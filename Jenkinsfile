@@ -55,6 +55,29 @@ pipeline {
           TESTS=10
           for i in $(seq 1 $TESTS); do
             echo "Тест $i/$TESTS..."
+            HTTP_CODE=$(curl -s -o /tmp/canary_$i.html -w "%{http_code}" --max-time 15 http://${MANAGER_IP}:8081/)
+            if [ "$HTTP_CODE" = "200" ]; then
+              SUCCESS=$((SUCCESS + 1))
+              echo "✓ Тест $i пройден (HTTP $HTTP_CODE)"
+            else
+              echo "✗ Тест $i: HTTP $HTTP_CODE"
+            fi
+            sleep 4
+          done
+          echo "Успешных тестов: $SUCCESS/$TESTS"
+          [ "$SUCCESS" -ge 8 ] || exit 1
+          echo "Canary прошёл тестирование!"
+        '''
+      }
+    }
+    stage('Canary Testing') {
+      steps {
+        sh '''
+          echo "=== Тестирование Canary-версии (порт 8081) ==="
+          SUCCESS=0
+          TESTS=10
+          for i in $(seq 1 $TESTS); do
+            echo "Тест $i/$TESTS..."
             if curl -f -s --max-time 15 http://${MANAGER_IP}:8081/ > /tmp/canary_$i.html; then
               if ! grep -iq "error\\|fatal\\|exception\\|failed" /tmp/canary_$i.html; then
                 SUCCESS=$((SUCCESS + 1))
