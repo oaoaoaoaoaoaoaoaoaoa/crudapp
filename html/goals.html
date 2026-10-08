@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Мои цели</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="dashboard">
+    <div class="sidebar">
+        <h2>🏋 Fitness App</h2>
+        <a href="profile.html" class="nav-btn">📋 Мой профиль</a>
+        <a href="goals.html" class="nav-btn active">🎯 Цели</a>
+        <a href="calendar.html" class="nav-btn">📅 Календарь</a>
+        <a href="health.html" class="nav-btn">❤️ Здоровье</a>
+        <a href="workout.html" class="nav-btn">🏋️ Тренировки</a>
+        <a href="meal.html" class="nav-btn">🍽️ Питание</a>
+        <a href="favorites.html" class="nav-btn">⭐ Избранное</a>
+        <a href="#" onclick="logout()" class="nav-btn logout">🚪 Выйти</a>
+    </div>
+    <div class="content">
+        <div class="section">
+            <h2>🎯 Новая цель</h2>
+            <form id="goalForm">
+                <select id="goalType" required>
+                    <option value="weight_loss">🏃 Похудение</option>
+                    <option value="muscle_gain">💪 Набор мышечной массы</option>
+                    <option value="steps">👣 Шаги</option>
+                </select>
+                
+
+                <div id="weightGoalFields">
+                    <input type="number" id="desiredValue" placeholder="Желаемый вес (кг)" step="0.1">
+                </div>
+                
+
+                <div id="stepsGoalFields" style="display: none;">
+                    <input type="number" id="targetSteps" placeholder="Желаемое количество шагов" step="1">
+                </div>
+                
+                <input type="date" id="startDate" required>
+                <input type="date" id="endDate" required>
+                
+                <div id="workoutsSection" style="margin-top: 15px; margin-bottom: 15px;">
+                    <label style="font-weight: bold;">🏋️ Сколько раз в неделю вы готовы тренироваться?</label>
+                    <select id="workoutsPerWeek" style="margin-top: 5px;">
+                        <option value="1">1 раз в неделю</option>
+                        <option value="2">2 раза в неделю</option>
+                        <option value="3">3 раза в неделю</option>
+                        <option value="4">4 раза в неделю</option>
+                        <option value="5">5 раз в неделю</option>
+                        <option value="6">6 раз в неделю</option>
+                        <option value="7">Каждый день</option>
+                    </select>
+                </div>
+                
+                <div id="mealsSection" style="margin-top: 15px; margin-bottom: 15px;">
+                    <label style="font-weight: bold;">🍽️ Сколько приёмов пищи в день?</label>
+                    <select id="mealsPerDay" style="margin-top: 5px;">
+                        <option value="1">1 приём в день (только обед)</option>
+                        <option value="2">2 приёма в день (завтрак + ужин)</option>
+                        <option value="3">3 приёма в день (завтрак + обед + ужин)</option>
+                        <option value="4">4 приёма в день (с перекусом)</option>
+                        <option value="5" selected>5 приёмов в день (рекомендуется)</option>
+                        <option value="6">6 приёмов в день (два перекуса)</option>
+                    </select>
+                </div>
+                
+                <div id="muscleGroupSection" style="display: none; margin-top: 15px; margin-bottom: 15px;">
+                    <label style="font-weight: bold;">💪 Какие группы мышц хотите проработать?</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                        <label><input type="checkbox" name="muscle_group" value="грудь">  Грудь</label>
+                        <label><input type="checkbox" name="muscle_group" value="спина">  Спина</label>
+                        <label><input type="checkbox" name="muscle_group" value="ноги">  Ноги</label>
+                        <label><input type="checkbox" name="muscle_group" value="плечи">  Плечи</label>
+                        <label><input type="checkbox" name="muscle_group" value="бицепс">  Бицепс</label>
+                        <label><input type="checkbox" name="muscle_group" value="трицепс">  Трицепс</label>
+                        <label><input type="checkbox" name="muscle_group" value="пресс">  Пресс</label>
+                        <label><input type="checkbox" name="muscle_group" value="кор">  Кор</label>
+                        <label><input type="checkbox" name="muscle_group" value="ягодицы">  Ягодицы</label>
+                        <label><input type="checkbox" name="muscle_group" value="икры">  Икры</label>
+                        <label><input type="checkbox" name="muscle_group" value="квадрицепсы">  Квадрицепсы</label>
+                        <label><input type="checkbox" name="muscle_group" value="бицепс бедра">  Бицепс бедра</label>
+                        <label><input type="checkbox" name="muscle_group" value="трапеции">  Трапеции</label>
+                        <label><input type="checkbox" name="muscle_group" value="дельты">  Дельты</label>
+                        <label><input type="checkbox" name="muscle_group" value="широчайшие">  Широчайшие</label>
+                        <label><input type="checkbox" name="muscle_group" value="ромбовидные">  Ромбовидные</label>
+                        <label><input type="checkbox" name="muscle_group" value="приводящие">  Приводящие</label>
+                        <label><input type="checkbox" name="muscle_group" value="большая грудная">  Большая грудная</label>
+                        <label><input type="checkbox" name="muscle_group" value="передняя дельта">  Передняя дельта</label>
+                        <label><input type="checkbox" name="muscle_group" value="разгибатели спины">  Разгибатели спины</label>
+                        <label><input type="checkbox" name="muscle_group" value="кардио">  Кардио</label>
+                    </div>
+                    <p style="font-size: 12px; color: #718096; margin-top: 10px;">* Выберите группы мышц, которые хотите прорабатывать</p>
+                </div>
+                
+                <button type="submit">➕ Создать цель и планы</button>
+            </form>
+            <div id="goalMessage"></div>
+        </div>
+        
+        <div class="section" style="margin-top: 30px;">
+            <h2>📋 Мои цели</h2>
+            <div id="goalsList"></div>
+        </div>
+    </div>
+</div>
+
+<script src="api.js"></script>
+<script>
+    if (!sessionStorage.getItem('token')) {
+        window.location.href = 'index.html';
+    }
+    
+    async function checkDbOnLoad() {
+        const result = await checkDatabaseConnection();
+        if (!result.connected) {
+            showDatabaseErrorModal();
+            startPeriodicDbCheck();
+        }
+    }
+    
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+        try {
+            const response = await originalFetch.apply(this, args);
+            if (response.status === 503) {
+                showDatabaseErrorModal();
+                startPeriodicDbCheck();
+                throw new Error('База данных недоступна');
+            }
+            return response;
+        } catch (error) {
+            if (error.message === 'Failed to fetch' || error.message === 'NetworkError when attempting to fetch resource') {
+                showDatabaseErrorModal();
+                startPeriodicDbCheck();
+            }
+            throw error;
+        }
+    };
+    
+    checkDbOnLoad();
+    
+    setInterval(async () => {
+        const result = await checkDatabaseConnection();
+        if (!result.connected) {
+            showDatabaseErrorModal();
+            startPeriodicDbCheck();
+        }
+    }, 10000);
+</script>
+<script src="goals.js"></script>
+<script>
+    if (!sessionStorage.getItem('token')) window.location.href = 'index.html';
+    function logout() { sessionStorage.clear(); window.location.href = 'index.html'; }
+    
+
+    document.getElementById('goalType').addEventListener('change', function() {
+        const type = this.value;
+        
+        if (type === 'steps') {
+            document.getElementById('stepsGoalFields').style.display = 'block';
+            document.getElementById('weightGoalFields').style.display = 'none';
+            document.getElementById('muscleGroupSection').style.display = 'none';
+            document.getElementById('workoutsSection').style.display = 'none';
+            document.getElementById('mealsSection').style.display = 'none';
+            
+
+            document.getElementById('desiredValue').removeAttribute('required');
+            document.getElementById('workoutsPerWeek').removeAttribute('required');
+            document.getElementById('mealsPerDay').removeAttribute('required');
+            
+
+            document.getElementById('targetSteps').setAttribute('required', 'required');
+        } else {
+            document.getElementById('stepsGoalFields').style.display = 'none';
+            document.getElementById('weightGoalFields').style.display = 'block';
+            document.getElementById('workoutsSection').style.display = 'block';
+            document.getElementById('mealsSection').style.display = 'block';
+            document.getElementById('muscleGroupSection').style.display = type === 'muscle_gain' ? 'block' : 'none';
+            
+
+            document.getElementById('desiredValue').setAttribute('required', 'required');
+            document.getElementById('workoutsPerWeek').setAttribute('required', 'required');
+            document.getElementById('mealsPerDay').setAttribute('required', 'required');
+            
+
+            document.getElementById('targetSteps').removeAttribute('required');
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Питание</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="dashboard">
+    <div class="sidebar">
+        <h2>🏋 Fitness App</h2>
+        <a href="profile.html" class="nav-btn">📋 Мой профиль</a>
+        <a href="goals.html" class="nav-btn">🎯 Цели</a>
+        <a href="calendar.html" class="nav-btn">📅 Календарь</a>
+        <a href="health.html" class="nav-btn">❤️ Здоровье</a>
+        <a href="workout.html" class="nav-btn">🏋️ Тренировки</a>
+        <a href="meal.html" class="nav-btn active">🍽️ Питание</a>
+        <a href="favorites.html" class="nav-btn">⭐ Избранное</a>
+        <a href="#" onclick="logout()" class="nav-btn logout">🚪 Выйти</a>
+    </div>
+    <div class="content">
+        <div class="section">
+            <h2>🍽️ Планы питания</h2>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold;">Выберите цель:</label>
+                <select id="goalSelect" style="width: 100%; padding: 10px; margin-top: 5px;">
+                    <option value="">-- Загрузка целей... --</option>
+                </select>
+            </div>
+            
+            <button onclick="loadMealPlans()" class="load-btn">🔄 Загрузить планы</button>
+            <div id="mealPlansList"></div>
+        </div>
+        
+        <div class="section" style="margin-top: 30px;">
+            <h2>🍽️ Все рецепты</h2>
+            <p class="help-text">Рецепты подобраны с учётом ваших аллергий:</p>
+            <div id="recipesList"></div>
+        </div>
+    </div>
+</div>
+<script src="api.js"></script>
+<script>
+    if (!sessionStorage.getItem('token')) {
+        window.location.href = 'index.html';
+    }
+    
+    async function checkDbOnLoad() {
+        const result = await checkDatabaseConnection();
+        if (!result.connected) {
+            showDatabaseErrorModal();
+            startPeriodicDbCheck();
+        }
+    }
+    
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+        try {
+            const response = await originalFetch.apply(this, args);
+            if (response.status === 503) {
+                showDatabaseErrorModal();
+                startPeriodicDbCheck();
+                throw new Error('База данных недоступна');
+            }
+            return response;
+        } catch (error) {
+            if (error.message === 'Failed to fetch' || error.message === 'NetworkError when attempting to fetch resource') {
+                showDatabaseErrorModal();
+                startPeriodicDbCheck();
+            }
+            throw error;
+        }
+    };
+    
+    checkDbOnLoad();
+    
+    setInterval(async () => {
+        const result = await checkDatabaseConnection();
+        if (!result.connected) {
+            showDatabaseErrorModal();
+            startPeriodicDbCheck();
+        }
+    }, 10000);
+</script>
+<script src="meal.js"></script>
+<script>
+    if (!sessionStorage.getItem('token')) {
+        window.location.href = 'index.html';
+    }
+    function logout() {
+        sessionStorage.clear();
+        window.location.href = 'index.html';
+    }
+</script>
+</body>
+</html>

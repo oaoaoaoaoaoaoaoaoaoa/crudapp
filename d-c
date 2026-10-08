@@ -1,0 +1,47 @@
+version: '3.7'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: node.Dockerfile
+    image: oaoaoaoaoa/front
+    restart: always
+    ports:
+#      - "8080:5000" 
+       - "80:80"
+       - "443:443"       
+    volumes:
+      - /home/a1/crudapp/html:/var/www/html
+      - /home/a1/crudapp/api/uploads:/app/uploads
+    depends_on:
+      - db
+
+  db:
+    build:
+      context: .
+      dockerfile: mysql.Dockerfile
+    image: oaoaoaoaoa/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '1'
+      MYSQL_DATABASE: 'db'
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.0.1
+    restart: always
+    environment:
+      PMA_HOST: 'db'
+      PMA_USER: 'root'
+      PMA_PASSWORD: '1'
+    ports:
+      - "5000:80"
+    depends_on:
+      - db
+
+volumes:
+  mysql-data:

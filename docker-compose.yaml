@@ -1,0 +1,64 @@
+version: '3.7'
+
+services:
+  web:
+    image: oaoaoaoaoa/front:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: any
+        delay: 1s
+        max_attempts: 3
+      placement:
+        constraints:
+          - node.role == worker
+    networks:
+      - appnet
+
+  db:
+    image: oaoaoaoaoa/mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: '1'
+      MYSQL_DATABASE: 'db'
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 1s
+      placement:
+        constraints:
+          - node.role == worker
+    networks:
+      - appnet
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.0.1
+    environment:
+      PMA_HOST: 'db'
+      PMA_USER: 'root'
+      PMA_PASSWORD: '1'
+    ports:
+      - "5000:80"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 1s
+      placement:
+        constraints:
+          - node.role == manager
+    networks:
+      - appnet
+
+networks:
+  appnet:
+
+volumes:
+  mysql-data:

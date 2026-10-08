@@ -1,0 +1,916 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.auth-box {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-box h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.auth-box h2 {
+    margin-bottom: 20px;
+    color: #555;
+}
+
+.auth-box input, .auth-box select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.auth-box button {
+    width: 100%;
+    padding: 12px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.auth-box button:hover {
+    background: #5a67d8;
+}
+
+.error {
+    color: red;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.dashboard {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background: #2d3748;
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar h2 {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.nav-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: #4a5568;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 14px;
+    text-decoration: none;
+    margin: 0;
+}
+
+.nav-btn:hover {
+    background: #718096;
+}
+
+.nav-btn.active {
+    background: #667eea;
+    border-left: 4px solid white;
+}
+
+.logout {
+    background: #e53e3e;
+    margin-top: 20px;
+}
+
+.logout:hover {
+    background: #c53030;
+}
+
+.content {
+    flex: 1;
+    padding: 30px;
+    background: #f7fafc;
+}
+
+.welcome-card {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.section {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.section h2 {
+    margin-bottom: 20px;
+    color: #2d3748;
+}
+
+.section input, .section select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #cbd5e0;
+    border-radius: 5px;
+}
+
+.section button, .load-btn {
+    padding: 10px 20px;
+    background: #48bb78;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.section button:hover, .load-btn:hover {
+    background: #38a169;
+}
+
+.success {
+    color: green;
+    margin-top: 10px;
+}
+
+#goalsList, #healthHistory, #workoutPlansList, #mealPlansList {
+    margin-top: 20px;
+}
+
+.goal-item, .health-item, .plan-item {
+    background: #edf2f7;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+
+
+.checkbox-group {
+    background: #f7fafc;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.help-text {
+    font-size: 14px;
+    color: #718096;
+    margin-bottom: 10px;
+}
+
+.save-allergies-btn {
+    background: #4299e1;
+    margin-top: 10px;
+}
+
+.save-allergies-btn:hover {
+    background: #3182ce;
+}
+
+.success {
+    color: #38a169;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.error {
+    color: #e53e3e;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+
+.help-text {
+    font-size: 14px;
+    color: #718096;
+    margin-bottom: 15px;
+}
+
+.checkbox-group {
+    background: #f7fafc;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.checkbox-group label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 20px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.save-allergies-btn {
+    background: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.save-allergies-btn:hover {
+    background: #3182ce;
+}
+
+.section h3 {
+    margin-bottom: 15px;
+    color: #2d3748;
+}
+
+.delete-btn {
+    background: #e53e3e;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 15px;
+    margin-top: 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.delete-btn:hover {
+    background: #c53030;
+}
+
+
+.progress-bar-container {
+    background: #e2e8f0;
+    border-radius: 10px;
+    margin: 10px 0;
+    overflow: hidden;
+    height: 20px;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, #48bb78, #38a169);
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.update-btn {
+    background: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 12px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.update-btn:hover {
+    background: #3182ce;
+}
+
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 400px;
+    max-width: 90%;
+}
+
+.modal-content select,
+.modal-content input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.modal-content button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal-content button:first-of-type {
+    background: #48bb78;
+    color: white;
+}
+
+.modal-content button:last-of-type {
+    background: #e53e3e;
+    color: white;
+}
+
+
+.edit-plan-btn {
+    background: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 12px;
+    margin: 5px 0;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.edit-plan-btn:hover {
+    background: #3182ce;
+}
+
+.replace-btn, .replace-btn-meal {
+    background: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 3px 8px;
+    margin-left: 10px;
+    cursor: pointer;
+    font-size: 12px;
+    display: inline-block;
+}
+
+.replace-btn:hover, .replace-btn-meal:hover {
+    background: #3182ce;
+}
+
+
+.recipe-actions, .exercise-actions {
+    display: inline-flex;
+    gap: 10px;
+    margin-left: 15px;
+}
+
+.complete-btn, .favorite-btn {
+    background: none;
+    border: 1px solid #cbd5e0;
+    border-radius: 5px;
+    padding: 3px 8px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+
+.complete-btn {
+    background: #edf2f7;
+    color: #4a5568;
+}
+
+.complete-btn.active {
+    background: #48bb78;
+    color: white;
+    border-color: #38a169;
+}
+
+.complete-btn:hover {
+    background: #38a169;
+    color: white;
+}
+
+.favorite-btn {
+    background: #edf2f7;
+    color: #4a5568;
+}
+
+.favorite-btn.active {
+    background: #e53e3e;
+    color: white;
+    border-color: #c53030;
+}
+
+.favorite-btn:hover {
+    background: #e53e3e;
+    color: white;
+}
+
+.recipe-item.completed, .exercise-item.completed {
+    opacity: 0.7;
+    background: #f0fff4;
+}
+
+
+.favorites-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    background: #edf2f7;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: #667eea;
+    color: white;
+}
+
+.tab-btn:hover {
+    background: #cbd5e0;
+}
+
+.favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.favorite-card {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.favorite-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.favorite-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.favorite-header h3 {
+    margin: 0;
+    color: #2d3748;
+    font-size: 18px;
+}
+
+.favorite-header .favorite-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    transition: transform 0.2s;
+}
+
+.favorite-header .favorite-btn:hover {
+    transform: scale(1.1);
+}
+
+.favorite-details {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.favorite-details .calories {
+    color: #e53e3e;
+    font-weight: bold;
+}
+
+.favorite-details .muscle {
+    color: #48bb78;
+    font-weight: bold;
+}
+
+.favorite-details .category, .favorite-details .type {
+    color: #718096;
+}
+
+.ingredients {
+    font-size: 13px;
+    color: #4a5568;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 40px;
+    color: #718096;
+    background: #f7fafc;
+    border-radius: 12px;
+}
+
+
+.recipe-item, .exercise-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-bottom: 1px solid #e2e8f0;
+    transition: background 0.2s;
+}
+
+.recipe-item:hover, .exercise-item:hover {
+    background: #f7fafc;
+}
+
+
+.recipe-item.completed .recipe-name,
+.exercise-item.completed .exercise-name {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+
+.calories-info {
+    text-decoration: none !important;
+    opacity: 1 !important;
+}
+
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    flex: 1;
+}
+
+.checkbox-custom {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #cbd5e0;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    background: white;
+}
+
+.checkbox-custom.checked {
+    background: #48bb78;
+    border-color: #38a169;
+}
+
+.checkbox-custom.checked::after {
+    content: '✓';
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.recipe-name, .exercise-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+
+.heart-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    transition: all 0.2s;
+    outline: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    color: #cbd5e0;
+}
+
+.heart-btn:hover {
+    transform: scale(1.15);
+    background: rgba(0,0,0,0.05);
+}
+
+.heart-btn.active {
+    color: #e53e3e;
+}
+
+.heart-btn:focus {
+    outline: none;
+}
+
+.item-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.calories-info {
+    font-size: 12px;
+    color: #718096;
+    margin-left: 8px;
+    font-weight: normal;
+}
+
+.calories {
+    color: #e53e3e;
+    font-weight: bold;
+}
+
+
+.detail-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.detail-modal-content {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 0;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.detail-modal-header {
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 16px 16px 0 0;
+}
+
+.detail-modal-header h2 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.detail-modal-header .subtitle {
+    margin: 8px 0 0;
+    opacity: 0.9;
+    font-size: 14px;
+}
+
+.detail-modal-body {
+    padding: 24px;
+}
+
+
+.detail-modal-body .image-container {
+    width: 100%;
+    background: #f7fafc;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.detail-modal-body img {
+    width: 100%;
+    max-height: 280px;
+    object-fit: contain;
+    background: #f7fafc;
+    border-radius: 12px;
+}
+
+.detail-section {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 16px;
+}
+
+.detail-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.detail-section h3 {
+    color: #2d3748;
+    font-size: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.detail-section p {
+    color: #4a5568;
+    line-height: 1.5;
+    font-size: 14px;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.detail-badge {
+    display: inline-block;
+    background: #edf2f7;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: #4a5568;
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
+
+.detail-kbju {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.kbju-item {
+    background: #f7fafc;
+    padding: 8px 16px;
+    border-radius: 12px;
+    text-align: center;
+    flex: 1;
+    min-width: 70px;
+}
+
+.kbju-item .kbju-value {
+    font-size: 20px;
+    font-weight: bold;
+    display: block;
+}
+
+.kbju-item .kbju-label {
+    font-size: 12px;
+    color: #718096;
+}
+
+.detail-close-btn {
+    width: 100%;
+    padding: 12px;
+    background: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 16px;
+}
+
+.detail-close-btn:hover {
+    background: #3182ce;
+}
+
+
+.recipe-ingredients, .recipe-instructions {
+    background: #f7fafc;
+    padding: 12px 16px;
+    border-radius: 10px;
+}
+
+
+.contraindications {
+    background: #fff5f5;
+    border-left: 4px solid #e53e3e;
+    padding: 12px 16px;
+    border-radius: 8px;
+}
+
+.contraindications strong {
+    color: #e53e3e;
+}
+
+.met-value {
+    background: #ebf8ff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.servings-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #edf2f7;
+    border-radius: 20px;
+    padding: 2px 8px;
+}
+
+.servings-btn {
+    background: #cbd5e0;
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.servings-btn:hover {
+    background: #a0aec0;
+    transform: scale(1.05);
+}
+
+.servings-value {
+    min-width: 30px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+}
+.delete-account-btn {
+    background: #e53e3e;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+    transition: background 0.2s;
+}
+
+.delete-account-btn:hover {
+    background: #c53030;
+}

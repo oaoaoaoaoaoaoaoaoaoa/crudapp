@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой профиль - Fitness App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="dashboard">
+    <div class="sidebar">
+        <h2>🏋 Fitness App</h2>
+        <a href="profile.html" class="nav-btn active">📋 Мой профиль</a>
+        <a href="goals.html" class="nav-btn">🎯 Цели</a>
+        <a href="calendar.html" class="nav-btn">📅 Календарь</a>
+        <a href="health.html" class="nav-btn">❤️ Здоровье</a>
+        <a href="workout.html" class="nav-btn">🏋️ Тренировки</a>
+        <a href="meal.html" class="nav-btn">🍽️ Питание</a>
+	<a href="favorites.html" class="nav-btn">⭐ Избранное</a> 
+        <a href="#" onclick="logout()" class="nav-btn logout">🚪 Выйти</a>
+    </div>
+    <div class="content">
+        <div class="section">
+            <h2>📋 Мой профиль</h2>
+            <form id="profileForm">
+                <input type="number" id="height" placeholder="Рост (см)" step="1">
+                <input type="number" id="weight" placeholder="Вес (кг)" step="0.1">
+                <input type="number" id="age" placeholder="Возраст" step="1">
+                
+                <select id="gender">
+                    <option value="">Пол</option>
+                    <option value="male">Мужской</option>
+                    <option value="female">Женский</option>
+                </select>
+                
+                <select id="bodyType">
+                    <option value="">Тип телосложения</option>
+                    <option value="ectomorph">Эктоморф (худощавый)</option>
+                    <option value="mesomorph">Мезоморф (мускулистый)</option>
+                    <option value="endomorph">Эндоморф (склонный к полноте)</option>
+                </select>
+                <select id="activityLevel">
+		    <option value="sedentary">🛋️ Сидячий (офисная работа, нет тренировок)</option>
+		    <option value="light">🚶 Лёгкая активность (1-2 тренировки в неделю)</option>
+		    <option value="moderate">🏃 Умеренная (3-5 тренировок в неделю)</option>
+		    <option value="active">💪 Высокая (ежедневные тренировки)</option>
+		    <option value="very_active">🏋️ Очень высокая (физическая работа + тренировки)</option>
+		</select>
+                <button type="submit">💾 Сохранить профиль</button>
+            </form>
+            <div id="profileMessage"></div>
+        </div>
+        
+        
+        <div class="section" style="margin-top: 30px;">
+            <h3>🚫 Мои аллергии</h3>
+            <p class="help-text">Выберите продукты, которые нельзя употреблять:</p>
+            <div id="allergiesContainer" class="checkbox-group" style="display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; min-height: 100px;"></div>
+            <button type="button" id="saveAllergiesBtn" class="save-allergies-btn">💾 Сохранить аллергии</button>
+            <div id="allergiesMessage"></div>
+        </div>
+	
+	<div class="section" style="margin-top: 30px;">
+	    <hr style="margin-bottom: 20px;">
+	    <button id="deleteAccountBtn" class="delete-account-btn" onclick="confirmDeleteAccount()" style="background: #e53e3e; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px;">
+	        🗑️ Удалить аккаунт
+	    </button>
+	</div>
+    </div>
+</div>
+<script src="api.js"></script>
+<script>
+    if (!sessionStorage.getItem('token')) {
+        window.location.href = 'index.html';
+    }
+    
+    async function checkDbOnLoad() {
+        const result = await checkDatabaseConnection();
+        if (!result.connected) {
+            showDatabaseErrorModal();
+            startPeriodicDbCheck();
+        }
+    }
+    
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+        try {
+            const response = await originalFetch.apply(this, args);
+            if (response.status === 503) {
+                showDatabaseErrorModal();
+                startPeriodicDbCheck();
+                throw new Error('База данных недоступна');
+            }
+            return response;
+        } catch (error) {
+            if (error.message === 'Failed to fetch' || error.message === 'NetworkError when attempting to fetch resource') {
+                showDatabaseErrorModal();
+                startPeriodicDbCheck();
+            }
+            throw error;
+        }
+    };
+    
+    checkDbOnLoad();
+    
+    setInterval(async () => {
+        const result = await checkDatabaseConnection();
+        if (!result.connected) {
+            showDatabaseErrorModal();
+            startPeriodicDbCheck();
+        }
+    }, 10000);
+</script>
+<script src="profile.js"></script>
+<script>
+    if (!sessionStorage.getItem('token')) {
+        window.location.href = 'index.html';
+    }
+    
+    function logout() {
+        sessionStorage.clear();
+        window.location.href = 'index.html';
+    }
+</script>
+</body>
+</html>

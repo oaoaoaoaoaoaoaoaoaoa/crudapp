@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  web:
+    image: ${DOCKER_HUB_USER}/front:${BUILD_NUMBER}
+    deploy:
+      replicas: 1
+      labels:
+        - "traffic.weight=25"
+    ports:
+      - "8081:80"
+    environment:
+      - APP_ENV=canary
+    networks:
+      - appnet
+
+  db:
+    image: ${DOCKER_HUB_USER}/mysql:${BUILD_NUMBER}
+    deploy:
+      replicas: 1
+    environment:
+      - MYSQL_ROOT_PASSWORD=1
+      - MYSQL_DATABASE=db
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - appnet
+
+networks:
+  appnet:
+    external: true
+    name: app_appnet
+
+volumes:
+  mysql-data:

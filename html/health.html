@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Здоровье</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="dashboard">
+    <div class="sidebar">
+        <h2>🏋 Fitness App</h2>
+        <a href="profile.html" class="nav-btn">📋 Мой профиль</a>
+        <a href="goals.html" class="nav-btn">🎯 Цели</a>
+        <a href="calendar.html" class="nav-btn">📅 Календарь</a>
+        <a href="health.html" class="nav-btn active">❤️ Здоровье</a>
+        <a href="workout.html" class="nav-btn">🏋️ Тренировки</a>
+        <a href="meal.html" class="nav-btn">🍽️ Питание</a>
+        <a href="favorites.html" class="nav-btn">⭐ Избранное</a>
+        <a href="#" onclick="logout()" class="nav-btn logout">🚪 Выйти</a>
+    </div>
+    <div class="content">
+        
+
+        <div class="section">
+            <h2>❤️ Мониторинг</h2>
+            <button id="startWorkoutBtn" class="load-btn">🏃 Начать тренировку</button>
+            <button id="stopWorkoutBtn" class="delete-btn" style="margin-left: 10px;">⏹️ Остановить</button>
+            
+            <div id="liveMonitor" style="margin-top: 20px; padding: 15px; background: #f0f4f8; border-radius: 10px;">
+                <h3>📊 Данные в реальном времени</h3>
+                <p>❤️ Пульс: <span id="liveHeartRate">--</span> BPM</p>
+                <p>👣 Шаги сегодня: <span id="liveSteps">--</span></p>
+                <p>🕐 Последнее обновление: <span id="liveTimestamp">--</span></p>
+                <p id="workoutStatus" style="color: gray;">Тренировка не активна</p>
+                <div id="heartRateWarning" style="margin-top: 15px; padding: 10px; border-radius: 8px; display: none;">
+                    <span id="warningText"></span>
+                </div>
+            </div>
+        </div>
+        
+
+        <div class="section" style="margin-top: 30px;">
+            <h2>📊 История пульса</h2>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                <select id="metricSelect" style="padding: 8px; border-radius: 5px;">
+                    <option value="heart_rate">❤️ Пульс</option>
+                    <option value="steps">👣 Шаги</option>
+                </select>
+                <button id="refreshChartBtn" class="nav-btn" style="background: #4a5568;">🔄 Обновить график</button>
+            </div>
+            <canvas id="healthChart" width="800" height="400" style="max-width: 100%; height: auto;"></canvas>
+            <div id="chartInfo" style="margin-top: 10px; font-size: 12px; color: #718096; text-align: center;"></div>
+        </div>
+        
+    </div>
+</div>
+
+<script src="api.js"></script>
+<script>
+    if (!sessionStorage.getItem('token')) {
+        window.location.href = 'index.html';
+    }
+    
+    async function checkDbOnLoad() {
+        const result = await checkDatabaseConnection();
+        if (!result.connected) {
+            showDatabaseErrorModal();
+            startPeriodicDbCheck();
+        }
+    }
+    
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+        try {
+            const response = await originalFetch.apply(this, args);
+            if (response.status === 503) {
+                showDatabaseErrorModal();
+                startPeriodicDbCheck();
+                throw new Error('База данных недоступна');
+            }
+            return response;
+        } catch (error) {
+            if (error.message === 'Failed to fetch' || error.message === 'NetworkError when attempting to fetch resource') {
+                showDatabaseErrorModal();
+                startPeriodicDbCheck();
+            }
+            throw error;
+        }
+    };
+    
+    checkDbOnLoad();
+    
+    setInterval(async () => {
+        const result = await checkDatabaseConnection();
+        if (!result.connected) {
+            showDatabaseErrorModal();
+            startPeriodicDbCheck();
+        }
+    }, 10000);
+</script>
+<script src="health.js"></script>
+<script>
+    if (!sessionStorage.getItem('token')) window.location.href = 'index.html';
+    function logout() { sessionStorage.clear(); window.location.href = 'index.html'; }
+    
+ 
+    let ws = null;
+    
+    function connectWebSocket() {
+        const savedIP = localStorage.getItem('serverIP') || '127.0.0.1';
+        
+        ws = new WebSocket(`ws://${savedIP}:5000`);
+        
+        ws.onopen = () => {
+            console.log('✅ WebSocket подключен');
+            document.getElementById('liveMonitor').style.border = '2px solid #48bb78';
+        };
+        
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            
+            if (data.type === 'heartbeat') {
+                const heartRate = data.heart_rate || 0;
+                const steps = data.steps || 0;
+                
+                document.getElementById('liveHeartRate').innerText = heartRate;
+                document.getElementById('liveSteps').innerText = steps;
+                document.getElementById('liveTimestamp').innerText = new Date().toLocaleTimeString();
+                
+
+                const workoutStatusText = document.getElementById('workoutStatus').innerText;
+                const isWorkoutActive = workoutStatusText.includes('активна');
+                
+                const warningDiv = document.getElementById('heartRateWarning');
+                const warningText = document.getElementById('warningText');
+                
+                if (isWorkoutActive && heartRate > 0) {
+                    if (heartRate >= 90) {
+                        warningDiv.style.display = 'block';
+                        warningDiv.style.background = '#fee';
+                        warningDiv.style.border = '2px solid #e53e3e';
+                        warningText.innerHTML = '⚠️⚠️⚠️ ВНИМАНИЕ! Пульс выше 90! НЕМЕДЛЕННО ПРЕКРАТИТЕ ТРЕНИРОВКУ! ⚠️⚠️⚠️';
+                        warningText.style.color = '#c53030';
+                        warningText.style.fontWeight = 'bold';
+                        warningText.style.fontSize = '16px';
+                    } else if (heartRate >= 80) {
+                        warningDiv.style.display = 'block';
+                        warningDiv.style.background = '#fff3cd';
+                        warningDiv.style.border = '2px solid #ffc107';
+                        warningText.innerHTML = '⚠️ Внимание! Пульс выше 80. Рекомендуется сделать небольшой перерыв.';
+                        warningText.style.color = '#856404';
+                        warningText.style.fontWeight = 'normal';
+                        warningText.style.fontSize = '14px';
+                    } else {
+                        warningDiv.style.display = 'none';
+                    }
+                } else {
+                    warningDiv.style.display = 'none';
+                }
+                
+
+                if (window.addRealtimeData) {
+                    window.addRealtimeData(heartRate, steps);
+                }
+                
+
+                if (steps > 0 && typeof updateAllStepsGoalsProgress === 'function') {
+                    updateAllStepsGoalsProgress(steps);
+                }
+            }
+            
+            if (data.type === 'workout_started') {
+                document.getElementById('workoutStatus').innerText = '🏃 Тренировка активна!';
+                document.getElementById('workoutStatus').style.color = '#48bb78';
+                document.getElementById('heartRateWarning').style.display = 'none';
+            }
+            
+            if (data.type === 'workout_stopped') {
+                document.getElementById('workoutStatus').innerText = 'Тренировка не активна';
+                document.getElementById('workoutStatus').style.color = 'gray';
+                document.getElementById('heartRateWarning').style.display = 'none';
+            }
+        };
+        
+        ws.onerror = (error) => {
+            console.error('❌ WebSocket ошибка:', error);
+        };
+        
+        ws.onclose = () => {
+            console.log('🔌 WebSocket отключен');
+            setTimeout(connectWebSocket, 3000);
+        };
+    }
+    
+    document.getElementById('startWorkoutBtn').onclick = () => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'start_workout' }));
+            document.getElementById('workoutStatus').innerText = '⏳ Запуск тренировки...';
+        } else {
+            alert('❌ Нет связи с сервером');
+        }
+    };
+    
+    document.getElementById('stopWorkoutBtn').onclick = () => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'stop_workout' }));
+        } else {
+            alert('❌ Нет связи с сервером');
+        }
+    };
+    
+    connectWebSocket();
+</script>
+</body>
+</html>

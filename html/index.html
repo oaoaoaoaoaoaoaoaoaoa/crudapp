@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness App - Вход</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <div class="auth-box">
+        <h1>🏋 Fitness App</h1>
+        
+        <div id="dbStatus" style="display: block;">
+            <div id="dbWaiting" style="display: block;">
+                <div style="text-align: center; padding: 20px;">
+                    <div id="statusMessage" style="color: #666; font-size: 16px;">
+                        ⏳ База данных прогружается...<br>Пожалуйста, подождите немножко ❤️
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="loginForm" style="display: none;">
+            <h2>Вход</h2>
+            <input type="email" id="loginEmail" placeholder="Email" required>
+            <input type="password" id="loginPassword" placeholder="Пароль" required>
+            <button onclick="login()">Войти</button>
+            <p>Нет аккаунта? <a href="#" onclick="showRegister()">Зарегистрироваться</a></p>
+            <div id="loginError" class="error"></div>
+        </div>
+        
+        <div id="registerForm" style="display: none;">
+            <h2>Регистрация</h2>
+            <div style="background: #fee; border-left: 4px solid #e53e3e; padding: 10px; margin-bottom: 15px; font-size: 12px; text-align: left;">
+                <strong>⚠️ Важно!</strong><br>
+                Перед началом тренировок проконсультируйтесь с врачом.<br>
+                Все показатели рассчитываются приблизительно и могут содержать погрешности.<br>
+                Данные о пульсе и шагах носят информационный характер.<br>
+                <span style="font-size: 11px; color: #666;">Противопоказания: болезни сердца, травмы, беременность, высокое давление, восстановление после операций.</span>
+            </div>
+            <input type="text" id="regFirstName" placeholder="Имя" required>
+            <input type="text" id="regLastName" placeholder="Фамилия" required>
+            <input type="email" id="regEmail" placeholder="Email" required>
+            <input type="password" id="regPassword" placeholder="Пароль" required>
+            <input type="date" id="regBirthDate" placeholder="Дата рождения" required>
+
+            <div style="margin: 10px 0; display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="confirmContraindications" required style="width: 18px; height: 18px; margin: 0;">
+                <label for="confirmContraindications" style="font-size: 12px; margin: 0;">
+                    Я ознакомлен(а) с противопоказаниями и принимаю ответственность
+                </label>
+            </div>
+            <button onclick="register()">Зарегистрироваться</button>
+            <p>Уже есть аккаунт? <a href="#" onclick="showLogin()">Войти</a></p>
+            <div id="regError" class="error"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+
+<script src="api.js"></script>
+<script src="auth.js"></script>
+</body>
+</html>

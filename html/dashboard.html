@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Fitness App - Главная</title>
+    <link rel="stylesheet" href="style.css">
+    <meta http-equiv="refresh" content="300"> 
+</head>
+<body>
+<div class="dashboard">
+    <div class="sidebar">
+        <h2>🏋 Fitness App</h2>
+        <a href="profile.html" class="nav-btn">📋 Мой профиль</a>
+        <a href="goals.html" class="nav-btn">🎯 Цели</a>
+        <a href="calendar.html" class="nav-btn">📅 Календарь</a>
+        <a href="health.html" class="nav-btn">❤️ Здоровье</a>
+        <a href="workout.html" class="nav-btn">🏋️ Тренировки</a>
+        <a href="meal.html" class="nav-btn">🍽️ Питание</a>
+        <a href="favorites.html" class="nav-btn">⭐ Избранное</a>
+        <a href="#" onclick="logout()" class="nav-btn logout">🚪 Выйти</a>
+    </div>
+    <div class="content">
+        <div class="welcome-card">
+            <h1>Добро пожаловать!</h1>
+            <p>Выберите раздел в меню слева.</p>
+            <div id="dbStatusIndicator" style="margin-top: 20px; padding: 10px; border-radius: 8px; font-size: 12px; display: inline-block;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="api.js"></script>
+<script>
+    if (!sessionStorage.getItem('token')) {
+        window.location.href = 'index.html';
+    }
+    
+    function logout() {
+        sessionStorage.clear();
+        window.location.href = 'index.html';
+    }
+    
+    function updateDbStatusIndicator(connected) {
+        const indicator = document.getElementById('dbStatusIndicator');
+        if (indicator) {
+            if (connected) {
+                indicator.innerHTML = '✅ База данных: подключена';
+                indicator.style.background = '#c6f6d5';
+                indicator.style.color = '#22543d';
+            } else {
+                indicator.innerHTML = '⚠️ База данных: отключена';
+                indicator.style.background = '#fed7d7';
+                indicator.style.color = '#742a2a';
+            }
+        }
+    }
+    
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+        try {
+            const response = await originalFetch.apply(this, args);
+            if (response.status === 503) {
+                showDatabaseErrorModal();
+                throw new Error('База данных недоступна');
+            }
+            return response;
+        } catch (error) {
+            if (error.message === 'Failed to fetch' || error.message === 'NetworkError when attempting to fetch resource') {
+                showDatabaseErrorModal();
+            }
+            throw error;
+        }
+    };
+    
+    startDatabaseMonitoring();
+    
+    setInterval(async () => {
+        const result = await checkDatabaseConnection();
+        updateDbStatusIndicator(result.connected);
+    }, 5000);
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+        const result = await checkDatabaseConnection();
+        updateDbStatusIndicator(result.connected);
+    });
+</script>
+</body>
+</html>

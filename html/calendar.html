@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Календарь - Fitness App</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .calendar-day {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+            min-height: 110px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .calendar-day:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .day-number {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .weekday {
+            font-size: 12px;
+            color: #718096;
+            text-align: center;
+            margin-top: 3px;
+        }
+        
+        .calendar-items {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 8px;
+            flex: 1;
+        }
+        
+        .calendar-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            background: #f7fafc;
+        }
+        
+        .calendar-item[draggable="true"] {
+            cursor: grab;
+        }
+        
+        .calendar-item[draggable="true"]:active {
+            cursor: grabbing;
+        }
+        
+        .calendar-item[draggable="true"]:hover {
+            background: #edf2f7;
+            transform: translateY(-1px);
+        }
+        
+        .calendar-item.empty {
+            opacity: 0.6;
+            cursor: default;
+        }
+        
+        .calendar-item.empty:hover {
+            transform: none;
+        }
+        
+        .calendar-item.drag-over {
+            border: 2px solid #48bb78;
+            background: #e6fffa;
+            transform: scale(1.02);
+        }
+        
+        .meal-item {
+            border-left: 3px solid #48bb78;
+        }
+        
+        .workout-item {
+            border-left: 3px solid #e53e3e;
+        }
+        
+        .item-icon {
+            font-size: 14px;
+        }
+        
+        .item-name {
+            font-size: 11px;
+            color: #4a5568;
+            flex: 1;
+        }
+        
+        .calendar-item[draggable="true"] .item-name {
+            font-weight: 500;
+        }
+        
+        .day-plan {
+            margin-top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .day-plan.active {
+            display: block;
+        }
+        
+        .plan-details {
+            margin-top: 15px;
+        }
+        
+        .plan-details h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            margin-top: 15px;
+        }
+        
+        .plan-details ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .plan-details li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .plan-details li:last-child {
+            border-bottom: none;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .notification-success {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .notification-error {
+            background: #f56565;
+            color: white;
+        }
+        
+        .notification-info {
+            background: #4299e1;
+            color: white;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loading-spinner {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            color: #2d3748;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <div class="sidebar">
+        <h2>🏋 Fitness App</h2>
+        <a href="profile.html" class="nav-btn">📋 Мой профиль</a>
+        <a href="goals.html" class="nav-btn">🎯 Цели</a>
+        <a href="calendar.html" class="nav-btn active">📅 Календарь</a>
+        <a href="health.html" class="nav-btn">❤️ Здоровье</a>
+        <a href="workout.html" class="nav-btn">🏋️ Тренировки</a>
+        <a href="meal.html" class="nav-btn">🍽️ Питание</a>
+        <a href="favorites.html" class="nav-btn">⭐ Избранное</a>
+        <a href="#" onclick="logout()" class="nav-btn logout">🚪 Выйти</a>
+    </div>
+    <div class="content">
+        <h1>📅 Календарь планов</h1>
+        
+        <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+            <h3>Выберите цель</h3>
+            <select id="goalSelect" style="width: 100%; padding: 10px;">
+                <option value="">-- Загрузка целей... --</option>
+            </select>
+        </div>
+        
+        <div id="calendarBlock" style="display: none;">
+            <div id="calendarGrid"></div>
+            <div id="dayPlanBlock" class="day-plan"></div>
+        </div>
+    </div>
+</div>
+
+<script src="api.js"></script>
+<script>
+    if (!sessionStorage.getItem('token')) {
+        window.location.href = 'index.html';
+    }
+    
+    async function checkDbOnLoad() {
+        const result = await checkDatabaseConnection();
+        if (!result.connected) {
+            showDatabaseErrorModal();
+            startPeriodicDbCheck();
+        }
+    }
+    
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+        try {
+            const response = await originalFetch.apply(this, args);
+            if (response.status === 503) {
+                showDatabaseErrorModal();
+                startPeriodicDbCheck();
+                throw new Error('База данных недоступна');
+            }
+            return response;
+        } catch (error) {
+            if (error.message === 'Failed to fetch' || error.message === 'NetworkError when attempting to fetch resource') {
+                showDatabaseErrorModal();
+                startPeriodicDbCheck();
+            }
+            throw error;
+        }
+    };
+    
+    checkDbOnLoad();
+    
+    setInterval(async () => {
+        const result = await checkDatabaseConnection();
+        if (!result.connected) {
+            showDatabaseErrorModal();
+            startPeriodicDbCheck();
+        }
+    }, 10000);
+</script>
+<script src="calendar.js"></script>
+
+<script>
+    if (!sessionStorage.getItem('token')) {
+        window.location.href = 'index.html';
+    }
+    
+    function logout() { 
+        sessionStorage.clear(); 
+        window.location.href = 'index.html'; 
+    }
+    
+   
+    window.showNotification = function(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+    };
+    
+   
+    window.showLoading = function() {
+        let loader = document.getElementById('globalLoader');
+        if (!loader) {
+            loader = document.createElement('div');
+            loader.id = 'globalLoader';
+            loader.className = 'loading-overlay';
+            loader.innerHTML = '<div class="loading-spinner">⏳ Сохранение...</div>';
+            document.body.appendChild(loader);
+        }
+        loader.style.display = 'flex';
+    };
+    
+    window.hideLoading = function() {
+        const loader = document.getElementById('globalLoader');
+        if (loader) loader.style.display = 'none';
+    };
+</script>
+
+</body>
+</html>
