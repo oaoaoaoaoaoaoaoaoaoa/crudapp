@@ -85,7 +85,7 @@ pipeline {
             MONITOR_SUCCESS=0
             MONITOR_TESTS=10
             for j in $(seq 1 $MONITOR_TESTS); do
-              HTTP_CODE=$(curl -s -o /tmp/monitor_$j.html -w "%{http_code}" --max-time 15 http://${MANAGER_IP}:8080/)
+              HTTP_CODE=$(curl -s -o /tmp/monitor_$j.html -w "%{http_code}" --max-time 15 http://${MANAGER_IP}/)
               if [ "$HTTP_CODE" = "200" ]; then
                 MONITOR_SUCCESS=$((MONITOR_SUCCESS + 1))
                 echo "Check $j passed (HTTP 200)"
@@ -123,7 +123,7 @@ pipeline {
       steps {
         sh '''
           for i in $(seq 1 5); do
-            if curl -f --max-time 10 http://${MANAGER_IP}:8080/ > /dev/null 2>&1; then
+            if curl -f --max-time 10 http://${MANAGER_IP}/ > /dev/null 2>&1; then
               echo "Final test $i passed"
             else
               echo "Final test $i failed"
