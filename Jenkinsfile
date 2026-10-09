@@ -66,6 +66,7 @@ pipeline {
           echo "Successful tests: $SUCCESS/$TESTS"
           [ "$SUCCESS" -ge 8 ] || exit 1
 
+
           echo "=== Checking table goals in canary DB ==="
 
           TASK_ID=$(docker service ps ${CANARY_APP_NAME}_db --filter desired-state=running --format "{{.ID}}" | head -1)
@@ -81,7 +82,7 @@ pipeline {
           fi
           echo "Container: $DB_CONTAINER"
 
-          TABLES=$(docker exec "$DB_CONTAINER" mysql -uroot -p1 -N -e "USE db; SHOW TABLES LIKE 'goals';" 2>/dev/null)
+          TABLES=$(echo "USE db; SHOW TABLES LIKE 'goals';" | docker exec -i "$DB_CONTAINER" mysql -uroot -p1 -N 2>/dev/null)
           echo "Result: [$TABLES]"
           if [ "$TABLES" = "goals" ]; then
             echo "Table goals exists - OK"
@@ -89,6 +90,7 @@ pipeline {
             echo "Table goals NOT found - FAIL"
             exit 1
           fi
+
         '''
       }
     }    
