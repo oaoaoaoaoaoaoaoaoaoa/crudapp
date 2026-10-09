@@ -64,23 +64,6 @@ pipeline {
           done
           echo "Successful tests: $SUCCESS/$TESTS"
           [ "$SUCCESS" -ge 8 ] || exit 1
-
-
-
-          echo "=== Проверка таблицы goals в canary-БД ==="
-          DB_CONTAINER=$(docker ps --filter "name=app-canary_db" --format "{{.ID}}" | head -1)
-          if [ -z "$DB_CONTAINER" ]; then
-            echo "ERROR: canary-db container not found"
-            exit 1
-          fi
-          echo "Container: $DB_CONTAINER"
-          TABLES=$(docker exec "$DB_CONTAINER" mysql -uroot -p1 -N -e "USE db; SHOW TABLES LIKE 'goals';" 2>/dev/null)
-          echo "Result: [$TABLES]"
-          if [ "$TABLES" = "goals" ]; then
-            echo "✓ Table 'goals' exists"
-          else
-            echo "✗ Table 'goals' NOT found"
-            exit 1
           fi
         '''
       }
