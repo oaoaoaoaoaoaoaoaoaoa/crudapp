@@ -1,5 +1,5 @@
 pipeline {
-  agent { label 'docker-agent' } 
+  agent { label 'docker-agent' }
 
   environment {
     APP_NAME            = 'app'
@@ -47,7 +47,6 @@ pipeline {
       }
     }
 
-
     stage('Canary Testing') {
       steps {
         sh '''
@@ -66,7 +65,6 @@ pipeline {
           echo "Successful tests: $SUCCESS/$TESTS"
           [ "$SUCCESS" -ge 8 ] || exit 1
 
-
           echo "=== Checking table goals in canary DB ==="
 
           TASK_ID=$(docker service ps ${CANARY_APP_NAME}_db --filter desired-state=running --format "{{.ID}}" | head -1)
@@ -82,7 +80,7 @@ pipeline {
           fi
           echo "Container: $DB_CONTAINER"
 
-          TABLES=$(echo "USE db; SHOW TABLES LIKE 'goals';" | docker exec -i "$DB_CONTAINER" mysql -uroot -p1 -N 2>/dev/null)
+          TABLES=$(printf 'USE db;\nSHOW TABLES LIKE "goals";\n' | docker exec -i "$DB_CONTAINER" mysql -uroot -p1 -N 2>/dev/null)
           echo "Result: [$TABLES]"
           if [ "$TABLES" = "goals" ]; then
             echo "Table goals exists - OK"
@@ -90,10 +88,9 @@ pipeline {
             echo "Table goals NOT found - FAIL"
             exit 1
           fi
-
         '''
       }
-    }    
+    }
 
     stage('Gradual Traffic Shift') {
       steps {
