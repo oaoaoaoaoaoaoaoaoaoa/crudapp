@@ -47,7 +47,7 @@ pipeline {
       }
     }
 
-    
+
     stage('Canary Testing') {
       steps {
         sh '''
@@ -67,12 +67,20 @@ pipeline {
           [ "$SUCCESS" -ge 8 ] || exit 1
 
           echo "=== Checking table goals in canary DB ==="
-          DB_CONTAINER=$(docker ps --filter "name=app-canary_db" --format "{{.ID}}" | head -1)
+
+          TASK_ID=$(docker service ps ${CANARY_APP_NAME}_db --filter desired-state=running --format "{{.ID}}" | head -1)
+          if [ -z "$TASK_ID" ]; then
+            echo "ERROR: canary-db service task not found"
+            exit 1
+          fi
+
+          DB_CONTAINER=$(docker inspect --format "{{.Status.ContainerStatus.ContainerID}}" "$TASK_ID" 2>/dev/null)
           if [ -z "$DB_CONTAINER" ]; then
             echo "ERROR: canary-db container not found"
             exit 1
           fi
           echo "Container: $DB_CONTAINER"
+
           TABLES=$(docker exec "$DB_CONTAINER" mysql -uroot -p1 -N -e "USE db; SHOW TABLES LIKE 'goals';" 2>/dev/null)
           echo "Result: [$TABLES]"
           if [ "$TABLES" = "goals" ]; then
@@ -83,7 +91,7 @@ pipeline {
           fi
         '''
       }
-    }
+    }    
 
     stage('Gradual Traffic Shift') {
       steps {
