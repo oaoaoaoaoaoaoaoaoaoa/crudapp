@@ -76,35 +76,34 @@ pipeline {
     stage('Database Validation') {
       steps {
         sh '''
-          echo "=== Проверка наличия таблицы goals в Canary БД ==="
+          echo "=== Проверка таблицы goals в Canary БД (через master) ==="
 
-          DB_HOST="192.168.0.1"
-          DB_PORT="3307"
-          DB_USER="root"
-          DB_PASS="${MYSQL_ROOT_PASSWORD}"
-          DB_NAME="${MYSQL_DATABASE}"
+          MASTER_ID=$(docker ps --filter name=jenkins_jenkins --format "{{.ID}}" | head -1)
+          if [ -z "$MASTER_ID" ]; then
+            echo "ERROR: jenkins_jenkins container not found"
+            exit 1
+          fi
+          echo "Master: $MASTER_ID"
 
-          echo "Ожидание готовности MySQL на ${DB_HOST}:${DB_PORT}..."
+          echo "Ожидание готовности MySQL..."
           READY=0
-          for i in $(seq 1 60); do
-            if echo 'SELECT 1;' | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --skip-ssl > /dev/null 2>&1; then
+          for i in $(seq 1 30); do
+            if docker exec "$MASTER_ID" mysql -h app-canary_db -P 3306 -uroot -p1 --skip-ssl -e "SELECT 1;" > /dev/null 2>&1; then
               echo "MySQL готов (попытка $i)"
               READY=1
               break
             fi
-            echo "  Попытка $i/60..."
-            sleep 5
+            echo "  Попытка $i/30..."
+            sleep 3
           done
 
           if [ "$READY" -ne 1 ]; then
-            echo "ERROR: MySQL не отвечает за 5 минут"
+            echo "ERROR: MySQL не отвечает за 90 секунд"
             exit 1
           fi
 
-          echo "=== Проверка таблицы goals в БД ${DB_NAME} ==="
-
-          TABLES=$(echo "SHOW TABLES LIKE 'goals';" | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --skip-ssl -N -B "${DB_NAME}" 2>/dev/null)
-
+          echo "=== Проверка таблицы goals ==="
+          TABLES=$(docker exec "$MASTER_ID" mysql -h app-canary_db -P 3306 -uroot -p1 --skip-ssl -N -B db -e "SHOW TABLES LIKE 'goals';" 2>/dev/null)
           echo "Result: [$TABLES]"
 
           if [ "$TABLES" = "goals" ]; then
@@ -113,8 +112,6 @@ pipeline {
             echo "Table goals NOT found - FAIL"
             exit 1
           fi
-
-          echo "=== Проверка БД пройдена ==="
         '''
       }
     }
