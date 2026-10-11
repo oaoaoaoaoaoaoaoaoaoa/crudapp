@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: db
--- Время создания: Окт 11 2026 г., 19:06
+-- Время создания: Окт 11 2026 г., 19:16
 -- Версия сервера: 8.0.19
 -- Версия PHP: 7.4.1
 
@@ -21,6 +21,8 @@ SET time_zone = "+00:00";
 --
 -- База данных: `db`
 --
+CREATE DATABASE IF NOT EXISTS `db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+USE `db`;
 
 -- --------------------------------------------------------
 
