@@ -21,8 +21,8 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=1
       - MYSQL_DATABASE=db
-    volumes:
-      - mysql-data:/var/lib/mysql
+    ports:
+      - "3307:3306"
     networks:
       - appnet
 
@@ -30,6 +30,3 @@ networks:
   appnet:
     external: true
     name: app_appnet
-
-volumes:
-  mysql-data:

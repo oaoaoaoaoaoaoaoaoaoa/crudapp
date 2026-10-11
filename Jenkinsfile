@@ -9,6 +9,9 @@ pipeline {
     BACKEND_IMAGE_NAME  = 'front'
     DATABASE_IMAGE_NAME = 'mysql'
     MANAGER_IP          = '192.168.0.1'
+    CANARY_DB_PORT      = '3307'
+    MYSQL_ROOT_PASSWORD = '1'
+    MYSQL_DATABASE      = 'db'
   }
 
   stages {
@@ -65,26 +68,33 @@ pipeline {
           echo "Successful tests: $SUCCESS/$TESTS"
           [ "$SUCCESS" -ge 8 ] || exit 1
 
-          echo "=== Checking table goals in canary DB ==="
+          echo "=== Checking table goals in canary DB (via TCP) ==="
 
-          TASK_ID=$(docker service ps ${CANARY_APP_NAME}_db --filter desired-state=running --format "{{.ID}}" | head -1)
-          if [ -z "$TASK_ID" ]; then
-            echo "ERROR: canary-db service task not found"
+          DB_HOST="${MANAGER_IP}"
+          DB_PORT="${CANARY_DB_PORT}"
+          DB_USER="root"
+          DB_PASS="${MYSQL_ROOT_PASSWORD}"
+          DB_NAME="${MYSQL_DATABASE}"
+
+          echo "Ожидание готовности MySQL на ${DB_HOST}:${DB_PORT}..."
+          READY=0
+          for i in $(seq 1 60); do
+            if echo 'SELECT 1;' | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --skip-ssl > /dev/null 2>&1; then
+              echo "MySQL готов (попытка $i)"
+              READY=1
+              break
+            fi
+            echo "  Попытка $i/60..."
+            sleep 3
+          done
+
+          if [ "$READY" -ne 1 ]; then
+            echo "ERROR: MySQL не отвечает за 180 секунд"
             exit 1
           fi
 
-          DB_CONTAINER=$(docker inspect --format "{{.Status.ContainerStatus.ContainerID}}" "$TASK_ID" 2>/dev/null)
-          if [ -z "$DB_CONTAINER" ]; then
-            echo "ERROR: canary-db container not found"
-            exit 1
-          fi
-          echo "Container: $DB_CONTAINER"
-
-          TABLES=$(docker exec -i "$DB_CONTAINER" mysql -uroot -p1 -N 2>/dev/null <<'EOF'
-USE db;
-SHOW TABLES LIKE 'goals';
-EOF
-)
+          echo "=== SHOW TABLES LIKE 'goals' ==="
+          TABLES=$(echo "SHOW TABLES LIKE 'goals';" | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --skip-ssl -N -B "${DB_NAME}" 2>/dev/null)
           echo "Result: [$TABLES]"
           if [ "$TABLES" = "goals" ]; then
             echo "Table goals exists - OK"
