@@ -68,7 +68,7 @@ pipeline {
           echo "Successful tests: $SUCCESS/$TESTS"
           [ "$SUCCESS" -ge 8 ] || exit 1
 
-          echo "=== Checking table goals in canary DB (via TCP) ==="
+          echo "=== Checking table goals in canary DB (via TCP port 3307) ==="
 
           DB_HOST="${MANAGER_IP}"
           DB_PORT="${CANARY_DB_PORT}"
@@ -90,6 +90,9 @@ pipeline {
 
           if [ "$READY" -ne 1 ]; then
             echo "ERROR: MySQL не отвечает за 180 секунд"
+            echo "--- Диагностика ---"
+            echo "Проверка порта ${DB_HOST}:${DB_PORT}:"
+            (echo > /dev/tcp/${DB_HOST}/${DB_PORT}) 2>&1 || echo "Порт закрыт или недоступен"
             exit 1
           fi
 
