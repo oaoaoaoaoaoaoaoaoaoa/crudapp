@@ -78,8 +78,8 @@ pipeline {
         sh '''
           echo "=== Проверка наличия таблицы goals в Canary БД ==="
 
-          DB_HOST="app-canary_db"
-          DB_PORT="3306"
+          DB_HOST="192.168.0.1"
+          DB_PORT="3307"
           DB_USER="root"
           DB_PASS="${MYSQL_ROOT_PASSWORD}"
           DB_NAME="${MYSQL_DATABASE}"
