@@ -9,8 +9,6 @@ pipeline {
     BACKEND_IMAGE_NAME  = 'front'
     DATABASE_IMAGE_NAME = 'mysql'
     MANAGER_IP          = '192.168.0.1'
-    CANARY_DB_HOST      = 'app-canary_db'
-    CANARY_DB_PORT      = '3306'
     MYSQL_ROOT_PASSWORD = '1'
     MYSQL_DATABASE      = 'db'
   }
@@ -44,6 +42,7 @@ pipeline {
     stage('Deploy Canary') {
       steps {
         sh '''
+          echo "=== Развёртывание Canary ==="
           docker stack deploy -c docker-compose_canary.yaml ${CANARY_APP_NAME} --with-registry-auth
           sleep 40
           docker service ls --filter name=${CANARY_APP_NAME}
@@ -54,6 +53,7 @@ pipeline {
     stage('Canary Testing') {
       steps {
         sh '''
+          echo "=== Тестирование Canary-версии (порт 8081) ==="
           SUCCESS=0
           TESTS=10
           for i in $(seq 1 $TESTS); do
@@ -68,41 +68,55 @@ pipeline {
           done
           echo "Successful tests: $SUCCESS/$TESTS"
           [ "$SUCCESS" -ge 8 ] || exit 1
+          echo "Canary прошёл тестирование!"
+        '''
+      }
+    }
 
-          echo "=== Checking table goals in canary DB (via service name) ==="
+    stage('Database Validation') {
+      steps {
+        sh '''
+          echo "=== Проверка наличия таблицы goals в Canary БД (через TCP) ==="
 
-          DB_HOST="${CANARY_DB_HOST}"
-          DB_PORT="${CANARY_DB_PORT}"
+          DB_HOST="${MANAGER_IP}"
+          DB_PORT="3307"
           DB_USER="root"
           DB_PASS="${MYSQL_ROOT_PASSWORD}"
           DB_NAME="${MYSQL_DATABASE}"
 
+          # --- Ожидание готовности MySQL ---
           echo "Ожидание готовности MySQL на ${DB_HOST}:${DB_PORT}..."
           READY=0
           for i in $(seq 1 60); do
-            if echo 'SELECT 1;' | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --ssl-mode=DISABLED > /dev/null 2>&1; then
+            if echo 'SELECT 1;' | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --skip-ssl > /dev/null 2>&1; then
               echo "MySQL готов (попытка $i)"
               READY=1
               break
             fi
             echo "  Попытка $i/60..."
-            sleep 3
+            sleep 5
           done
 
           if [ "$READY" -ne 1 ]; then
-            echo "ERROR: MySQL не отвечает за 180 секунд"
+            echo "ERROR: MySQL не отвечает за 5 минут"
             exit 1
           fi
 
-          echo "=== SHOW TABLES LIKE 'goals' ==="
-          TABLES=$(echo "SHOW TABLES LIKE 'goals';" | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --ssl-mode=DISABLED -N -B "${DB_NAME}" 2>/dev/null)
+          # --- Проверка наличия таблицы goals ---
+          echo "=== Проверка таблицы goals в БД ${DB_NAME} ==="
+
+          TABLES=$(echo "SHOW TABLES LIKE 'goals';" | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --skip-ssl -N -B "${DB_NAME}" 2>/dev/null)
+
           echo "Result: [$TABLES]"
+
           if [ "$TABLES" = "goals" ]; then
             echo "Table goals exists - OK"
           else
             echo "Table goals NOT found - FAIL"
             exit 1
           fi
+
+          echo "=== Проверка БД пройдена ==="
         '''
       }
     }
@@ -110,7 +124,11 @@ pipeline {
     stage('Gradual Traffic Shift') {
       steps {
         sh '''
+          echo "=== Постепенное переключение трафика на новую версию ==="
+
           if docker service ls --filter name=${APP_NAME}_web | grep -q ${APP_NAME}_web; then
+            echo "Основной сервис существует — начинаем rolling update"
+
             docker service update \
               --image ${DOCKER_HUB_USER}/${BACKEND_IMAGE_NAME}:${BUILD_NUMBER} \
               --update-parallelism 1 \
@@ -151,9 +169,12 @@ pipeline {
             docker stack rm ${CANARY_APP_NAME} || true
             sleep 20
           else
+            echo "Первый деплой — разворачиваем продакшен"
             docker stack deploy -c docker-compose.yaml ${APP_NAME} --with-registry-auth
             sleep 60
           fi
+
+          echo "Постепенное переключение завершено"
         '''
       }
     }
@@ -161,6 +182,7 @@ pipeline {
     stage('Final Verification') {
       steps {
         sh '''
+          echo "=== Финальная проверка ==="
           for i in $(seq 1 5); do
             if curl -f --max-time 10 http://${MANAGER_IP}/ > /dev/null 2>&1; then
               echo "Final test $i passed"
@@ -170,6 +192,7 @@ pipeline {
             fi
             sleep 5
           done
+          echo "Все финальные тесты пройдены!"
         '''
       }
     }
@@ -177,11 +200,14 @@ pipeline {
 
   post {
     success {
+      echo "Canary-деплой успешно завершён!"
       sh 'docker logout'
     }
     failure {
+      echo "Ошибка в пайплайне — canary удалён, продакшен остался прежним"
       sh '''
         docker stack rm ${CANARY_APP_NAME} || true
+        echo "Canary удалён, продакшен не тронут"
       '''
       sh 'docker logout'
     }
