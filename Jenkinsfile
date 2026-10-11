@@ -9,7 +9,8 @@ pipeline {
     BACKEND_IMAGE_NAME  = 'front'
     DATABASE_IMAGE_NAME = 'mysql'
     MANAGER_IP          = '192.168.0.1'
-    CANARY_DB_PORT      = '3307'
+    CANARY_DB_HOST      = 'app-canary_db'
+    CANARY_DB_PORT      = '3306'
     MYSQL_ROOT_PASSWORD = '1'
     MYSQL_DATABASE      = 'db'
   }
@@ -68,9 +69,9 @@ pipeline {
           echo "Successful tests: $SUCCESS/$TESTS"
           [ "$SUCCESS" -ge 8 ] || exit 1
 
-          echo "=== Checking table goals in canary DB (via TCP port 3307) ==="
+          echo "=== Checking table goals in canary DB (via service name) ==="
 
-          DB_HOST="${MANAGER_IP}"
+          DB_HOST="${CANARY_DB_HOST}"
           DB_PORT="${CANARY_DB_PORT}"
           DB_USER="root"
           DB_PASS="${MYSQL_ROOT_PASSWORD}"
@@ -79,7 +80,7 @@ pipeline {
           echo "Ожидание готовности MySQL на ${DB_HOST}:${DB_PORT}..."
           READY=0
           for i in $(seq 1 60); do
-            if echo 'SELECT 1;' | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" > /dev/null 2>&1; then
+            if echo 'SELECT 1;' | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --ssl-mode=DISABLED > /dev/null 2>&1; then
               echo "MySQL готов (попытка $i)"
               READY=1
               break
@@ -94,7 +95,7 @@ pipeline {
           fi
 
           echo "=== SHOW TABLES LIKE 'goals' ==="
-          TABLES=$(echo "SHOW TABLES LIKE 'goals';" | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" -N -B "${DB_NAME}" 2>/dev/null)
+          TABLES=$(echo "SHOW TABLES LIKE 'goals';" | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --ssl-mode=DISABLED -N -B "${DB_NAME}" 2>/dev/null)
           echo "Result: [$TABLES]"
           if [ "$TABLES" = "goals" ]; then
             echo "Table goals exists - OK"
