@@ -80,7 +80,11 @@ pipeline {
           fi
           echo "Container: $DB_CONTAINER"
 
-          TABLES=$(printf 'USE db;\nSHOW TABLES LIKE "goals";\n' | docker exec -i "$DB_CONTAINER" mysql -uroot -p1 -N 2>/dev/null)
+          TABLES=$(docker exec -i "$DB_CONTAINER" mysql -uroot -p1 -N 2>/dev/null <<'EOF'
+USE db;
+SHOW TABLES LIKE 'goals';
+EOF
+)
           echo "Result: [$TABLES]"
           if [ "$TABLES" = "goals" ]; then
             echo "Table goals exists - OK"
