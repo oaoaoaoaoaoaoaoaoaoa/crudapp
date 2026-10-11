@@ -76,19 +76,18 @@ pipeline {
     stage('Database Validation') {
       steps {
         sh '''
-          echo "=== Проверка наличия таблицы goals в Canary БД (через TCP) ==="
+          echo "=== Проверка наличия таблицы goals в Canary БД ==="
 
-          DB_HOST="${MANAGER_IP}"
-          DB_PORT="3307"
+          DB_HOST="app-canary_db"
+          DB_PORT="3306"
           DB_USER="root"
           DB_PASS="${MYSQL_ROOT_PASSWORD}"
           DB_NAME="${MYSQL_DATABASE}"
 
-          # --- Ожидание готовности MySQL ---
           echo "Ожидание готовности MySQL на ${DB_HOST}:${DB_PORT}..."
           READY=0
           for i in $(seq 1 60); do
-            if echo 'SELECT 1;' | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --ssl=0 > /dev/null 2>&1; then
+            if echo 'SELECT 1;' | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --skip-ssl > /dev/null 2>&1; then
               echo "MySQL готов (попытка $i)"
               READY=1
               break
@@ -102,10 +101,9 @@ pipeline {
             exit 1
           fi
 
-          # --- Проверка наличия таблицы goals ---
           echo "=== Проверка таблицы goals в БД ${DB_NAME} ==="
 
-          TABLES=$(echo "SHOW TABLES LIKE 'goals';" | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --ssl=0 -N -B "${DB_NAME}" 2>/dev/null)
+          TABLES=$(echo "SHOW TABLES LIKE 'goals';" | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --skip-ssl -N -B "${DB_NAME}" 2>/dev/null)
 
           echo "Result: [$TABLES]"
 
