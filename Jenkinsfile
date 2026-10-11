@@ -76,19 +76,18 @@ pipeline {
     stage('Database Validation') {
       steps {
         sh '''
-          echo "=== Проверка таблицы goals в Canary БД (через master) ==="
+          echo "=== Проверка таблицы goals в Canary БД ==="
 
-          MASTER_ID=$(docker ps --filter name=jenkins_jenkins --format "{{.ID}}" | head -1)
-          if [ -z "$MASTER_ID" ]; then
-            echo "ERROR: jenkins_jenkins container not found"
-            exit 1
-          fi
-          echo "Master: $MASTER_ID"
+          DB_HOST="192.168.0.1"
+          DB_PORT="3307"
+          DB_USER="root"
+          DB_PASS="${MYSQL_ROOT_PASSWORD}"
+          DB_NAME="${MYSQL_DATABASE}"
 
-          echo "Ожидание готовности MySQL..."
+          echo "Ожидание готовности MySQL на ${DB_HOST}:${DB_PORT}..."
           READY=0
           for i in $(seq 1 30); do
-            if docker exec "$MASTER_ID" mysql -h app-canary_db -P 3306 -uroot -p1 --skip-ssl -e "SELECT 1;" > /dev/null 2>&1; then
+            if echo 'SELECT 1;' | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --skip-ssl > /dev/null 2>&1; then
               echo "MySQL готов (попытка $i)"
               READY=1
               break
@@ -98,12 +97,11 @@ pipeline {
           done
 
           if [ "$READY" -ne 1 ]; then
-            echo "ERROR: MySQL не отвечает за 90 секунд"
+            echo "ERROR: MySQL не отвечает"
             exit 1
           fi
 
-          echo "=== Проверка таблицы goals ==="
-          TABLES=$(docker exec "$MASTER_ID" mysql -h app-canary_db -P 3306 -uroot -p1 --skip-ssl -N -B db -e "SHOW TABLES LIKE 'goals';" 2>/dev/null)
+          TABLES=$(echo "SHOW TABLES LIKE 'goals';" | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --skip-ssl -N -B "${DB_NAME}" 2>/dev/null)
           echo "Result: [$TABLES]"
 
           if [ "$TABLES" = "goals" ]; then
