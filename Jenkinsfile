@@ -79,7 +79,7 @@ pipeline {
           echo "Ожидание готовности MySQL на ${DB_HOST}:${DB_PORT}..."
           READY=0
           for i in $(seq 1 60); do
-            if echo 'SELECT 1;' | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --skip-ssl > /dev/null 2>&1; then
+            if echo 'SELECT 1;' | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" > /dev/null 2>&1; then
               echo "MySQL готов (попытка $i)"
               READY=1
               break
@@ -90,14 +90,11 @@ pipeline {
 
           if [ "$READY" -ne 1 ]; then
             echo "ERROR: MySQL не отвечает за 180 секунд"
-            echo "--- Диагностика ---"
-            echo "Проверка порта ${DB_HOST}:${DB_PORT}:"
-            (echo > /dev/tcp/${DB_HOST}/${DB_PORT}) 2>&1 || echo "Порт закрыт или недоступен"
             exit 1
           fi
 
           echo "=== SHOW TABLES LIKE 'goals' ==="
-          TABLES=$(echo "SHOW TABLES LIKE 'goals';" | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" --skip-ssl -N -B "${DB_NAME}" 2>/dev/null)
+          TABLES=$(echo "SHOW TABLES LIKE 'goals';" | mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" -N -B "${DB_NAME}" 2>/dev/null)
           echo "Result: [$TABLES]"
           if [ "$TABLES" = "goals" ]; then
             echo "Table goals exists - OK"
