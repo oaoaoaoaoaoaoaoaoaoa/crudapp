@@ -120,7 +120,7 @@ pipeline {
           echo "Постепенное переключение на новую версию"
 
           if docker service ls --filter name=${APP_NAME}_web | grep -q ${APP_NAME}_web; then
-            echo "Основной сервис существует — начинаем rolling update"
+            echo "Основной сервис существует"
 
             docker service update \
               --image ${DOCKER_HUB_USER}/${BACKEND_IMAGE_NAME}:${BUILD_NUMBER} \
