@@ -42,7 +42,7 @@ pipeline {
     stage('Deploy Canary') {
       steps {
         sh '''
-          echo "=== Развёртывание Canary ==="
+          echo "Развёртывание Canary"
           docker stack deploy -c docker-compose_canary.yaml ${CANARY_APP_NAME} --with-registry-auth
           sleep 40
           docker service ls --filter name=${CANARY_APP_NAME}
@@ -53,7 +53,7 @@ pipeline {
     stage('Canary Testing') {
       steps {
         sh '''
-          echo "=== Тестирование Canary-версии (порт 8081) ==="
+          echo "Тестирование Canary"
           SUCCESS=0
           TESTS=10
           for i in $(seq 1 $TESTS); do
@@ -68,7 +68,7 @@ pipeline {
           done
           echo "Successful tests: $SUCCESS/$TESTS"
           [ "$SUCCESS" -ge 8 ] || exit 1
-          echo "Canary прошёл тестирование!"
+          echo "Canary прошёл тестирование"
         '''
       }
     }
@@ -76,7 +76,7 @@ pipeline {
     stage('Database Validation') {
       steps {
         sh '''
-          echo "=== Проверка таблицы goals в Canary БД ==="
+          echo "Проверка таблицы goals"
 
           DB_HOST="192.168.0.1"
           DB_PORT="3307"
@@ -117,7 +117,7 @@ pipeline {
     stage('Gradual Traffic Shift') {
       steps {
         sh '''
-          echo "=== Постепенное переключение трафика на новую версию ==="
+          echo "Постепенное переключение на новую версию"
 
           if docker service ls --filter name=${APP_NAME}_web | grep -q ${APP_NAME}_web; then
             echo "Основной сервис существует — начинаем rolling update"
@@ -162,7 +162,7 @@ pipeline {
             docker stack rm ${CANARY_APP_NAME} || true
             sleep 20
           else
-            echo "Первый деплой — разворачиваем продакшен"
+            echo "Первый деплой (разворачиваем продакшен)"
             docker stack deploy -c docker-compose.yaml ${APP_NAME} --with-registry-auth
             sleep 60
           fi
@@ -175,7 +175,7 @@ pipeline {
     stage('Final Verification') {
       steps {
         sh '''
-          echo "=== Финальная проверка ==="
+          echo "Финальная проверка"
           for i in $(seq 1 5); do
             if curl -f --max-time 10 http://${MANAGER_IP}/ > /dev/null 2>&1; then
               echo "Final test $i passed"
@@ -185,7 +185,7 @@ pipeline {
             fi
             sleep 5
           done
-          echo "Все финальные тесты пройдены!"
+          echo "Все финальные тесты пройдены"
         '''
       }
     }
@@ -193,7 +193,7 @@ pipeline {
 
   post {
     success {
-      echo "Canary-деплой успешно завершён!"
+      echo "Canary-деплой успешно завершён"
       sh 'docker logout'
     }
     failure {
